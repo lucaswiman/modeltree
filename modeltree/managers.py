@@ -8,11 +8,10 @@ class ModelTreeManager(models.Manager):
         super(ModelTreeManager, self).__init__(*args, **kwargs)
         self.tree = tree or self.model
 
-    def get_query_set(self):
+    def get_queryset(self):
         return ModelTreeQuerySet(model=self.tree, using=self.db)
 
-    def select(self, *args, **kwargs):
-        if django.VERSION < (1, 6):
-            return self.get_query_set().select(*args, **kwargs)
+    get_query_set = get_queryset  # Django<1.6 compatibility.
 
+    def select(self, *args, **kwargs):
         return self.get_queryset().select(*args, **kwargs)
