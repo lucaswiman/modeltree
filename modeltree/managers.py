@@ -1,4 +1,3 @@
-import django
 from django.db import models
 from modeltree.query import ModelTreeQuerySet
 
