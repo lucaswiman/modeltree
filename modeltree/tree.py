@@ -6,11 +6,19 @@ from django.conf import settings
 from django.db.models import Q
 
 try:
-    from django.apps import apps as cache
+    from django.apps import apps
+    cache = apps
+    get_model = apps.get_model
 except ImportError:
     # Django < 1.7
-    from django.db.models import loading
-    cache = loading.cache
+    from django.db.models.loading import cache
+    from django.db.models.loading import get_model
+
+try:
+    from django.db.models.related import RelatedObject
+except ImportError:
+    # Django >= 1.8
+    from django.db.models.fields.related import ManyToOneRel as RelatedObject
 
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.datastructures import MultiValueDict
@@ -410,7 +418,7 @@ class ModelTree(object):
         # If an app name is supplied we can reduce it down to only models
         # within that particular app.
         if app_name:
-            model = models.get_model(app_name, model_name)
+            model = get_model(app_name, model_name)
         else:
             # Attempt to find the model based on the name. Since we don't
             # have the app name, if a model of the same name exists multiple
@@ -963,9 +971,11 @@ class ModelTree(object):
 
             col = (alias, field.column)
 
-            if django.VERSION >= (1, 6):
+            if django.VERSION >= (1, 8):
+                from django.db.models.expressions import Col
+                aliases.append(Col(col, field))
+            elif django.VERSION >= (1, 6):
                 from django.db.models.sql.constants import SelectInfo
-
                 aliases.append(SelectInfo(col, field))
             else:
                 aliases.append(col)
@@ -1023,7 +1033,7 @@ class LazyModelTrees(object):
         # Qualified app.model label
         elif isinstance(alias, basestring) and '.' in alias:
             app_name, model_name = alias.split('.', 1)
-            model = models.get_model(app_name, model_name)
+            model = get_model(app_name, model_name)
 
             # If this corresponds to a model, update kwargs
             if model is not None:
