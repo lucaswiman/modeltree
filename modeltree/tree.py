@@ -3,8 +3,15 @@ import inspect
 import warnings
 from django.db import models
 from django.conf import settings
-from django.db.models import Q, loading
-from django.db.models.related import RelatedObject
+from django.db.models import Q
+
+try:
+    from django.apps import apps as cache
+except ImportError:
+    # Django < 1.7
+    from django.db.models import loading
+    cache = loading.cache
+
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.datastructures import MultiValueDict
 
@@ -408,7 +415,7 @@ class ModelTree(object):
             # Attempt to find the model based on the name. Since we don't
             # have the app name, if a model of the same name exists multiple
             # times, we need to throw an error.
-            for app, app_models in loading.cache.app_models.items():
+            for app, app_models in cache.app_models.items():
                 if model_name in app_models:
                     if model is not None:
                         raise ModelNotUnique('The model "{0}" is not unique. '
