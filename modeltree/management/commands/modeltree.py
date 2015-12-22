@@ -1,8 +1,8 @@
 import sys
+from importlib import import_module
 from optparse import NO_DEFAULT, OptionParser
 from django.core.management.base import CommandError, BaseCommand, \
     handle_default_options
-from django.utils.importlib import import_module
 
 
 class Command(BaseCommand):
