@@ -607,12 +607,12 @@ class ModelTree(object):
 
     def _build(self):
         node = ModelTreeNode(self.root_model)
-        self._root_node = self._find_relations(node)
+        self.root_node = self._find_relations(node)
 
         self._nodes[self.root_model] = {
             'parent': None,
             'depth': 0,
-            'node': self._root_node,
+            'node': self.root_node,
         }
 
         # store local cache of all models in this tree by name
@@ -622,13 +622,6 @@ class ModelTree(object):
 
             self._model_apps.appendlist(model_name, app_name)
             self._models[(app_name, model_name)] = model
-
-    @property
-    def root_node(self):
-        "Returns the `root_node` and implicitly builds the tree."
-        if not hasattr(self, '_root_node'):
-            self._build()
-        return self._root_node
 
     def _node_path_to_model(self, model, node, path=[]):
         "Returns a list representing the path of nodes to the model."
