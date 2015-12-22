@@ -1,5 +1,4 @@
 import inspect
-import warnings
 
 from django.apps import apps
 from django.db import models
@@ -175,15 +174,15 @@ class ModelTreeNode(object):
 class ModelTree(object):
     """A class to handle building and parsing a tree structure given a model.
 
-        `root_model` - The root or "reference" model for the tree. Everything
+        `model` - The root or "reference" model for the tree. Everything
         is relative to the root model.
 
-        `exclude` - A list of models that are to be excluded from this tree.
-        This is typically used to exclude models not intended to be exposed
-        through this API.
+        `excluded_models` - A list of models that are to be excluded from this
+        tree. This is typically used to exclude models not intended to be
+        exposed through this API.
 
-        `routes` - Explicitly defines a join path between two models. Each
-        route is made up of four components. Assuming some model hierarchy
+        `required_routes` - Explicitly defines a join path between two models.
+        Each route is made up of four components. Assuming some model hierarchy
         exists as shown below..
 
                                 ModelA
@@ -246,28 +245,11 @@ class ModelTree(object):
 
     """
     def __init__(self, model=None, **kwargs):
-        if model is None and 'root_model' in kwargs:
-            warnings.warn('The "root_model" key has been renamed to "model"',
-                          DeprecationWarning)
-            model = kwargs.get('root_model')
-
         if not model:
             raise TypeError('No "model" defined')
 
         excluded_models = kwargs.get('excluded_models', ())
         required_routes = kwargs.get('required_routes')
-
-        if not excluded_models and 'exclude' in kwargs:
-            warnings.warn('The "exclude" key has been renamed to '
-                          '"excluded_models"', DeprecationWarning)
-
-            excluded_models = kwargs.get('exclude', ())
-
-        if not required_routes and 'routes' in kwargs:
-            warnings.warn('The "routes" key has been renamed to '
-                          '"required_routes"', DeprecationWarning)
-
-            required_routes = kwargs.get('routes')
 
         excluded_routes = kwargs.get('excluded_routes')
 
@@ -423,15 +405,10 @@ class ModelTree(object):
         targets_seen = set()
 
         for route in routes:
-            if isinstance(route, dict):
-                source_label = route.get('source')
-                target_label = route.get('target')
-                field_label = route.get('field')
-                symmetrical = route.get('symmetrical')
-            else:
-                warnings.warn('Routes are now defined as dicts',
-                              DeprecationWarning)
-                source_label, target_label, field_label, symmetrical = route
+            source_label = route.get('source')
+            target_label = route.get('target')
+            field_label = route.get('field')
+            symmetrical = route.get('symmetrical')
 
             # get models
             source = self.get_model(source_label, local=False)
