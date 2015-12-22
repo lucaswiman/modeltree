@@ -195,7 +195,7 @@ class ModelTree(object):
 
         ..the traversal path from ModelA to ModelE is ambiguous. It could
         go from A -> B -> E or A -> C -> D -> E. By default, the shortest
-        path is always choosen to reduce the number of joins necessary, but
+        path is always chosen to reduce the number of joins necessary, but
         if ModelD did not exist..
 
                                 ModelA
@@ -205,7 +205,7 @@ class ModelTree(object):
                                 ModelE
 
         ..both paths only require two joins, thus the path that gets traversed
-        first will only be the choosen one.
+        first will only be the chosen one.
 
         To explicitly choose a path, a route can be defined. Taking the form::
 
@@ -699,7 +699,7 @@ class ModelTree(object):
         return str('__'.join(toks))
 
     def query_condition(self, field, operator, value, model=None):
-        "Conveniece method for constructing a `Q` object for a given field."
+        "Convenience method for constructing a `Q` object for a given field."
         lookup = self.query_string_for_field(field, operator=operator,
                                              model=model)
         return Q(**{lookup: value})

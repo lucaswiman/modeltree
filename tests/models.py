@@ -12,7 +12,7 @@ class Title(models.Model):
 
 
 class Employee(models.Model):
-    # Different db_column to ensure the corrent name is used
+    # Different db_column to ensure the correct name is used
     first_name = models.CharField(max_length=50, db_column='firstName')
     last_name = models.CharField(max_length=50)
     title = models.ForeignKey(Title)
