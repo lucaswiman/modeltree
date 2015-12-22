@@ -1,7 +1,13 @@
 from django.conf import settings
 from django.test import TestCase
-from modeltree.tree import trees, LazyModelTrees
+from modeltree.tree import LazyModelTrees
+from modeltree.tree import ModelDoesNotExist
+from modeltree.tree import ModelNotRelated
+from modeltree.tree import ModelNotUnique
+from modeltree.tree import ModelTree
+from modeltree.tree import trees
 from tests import models
+from tests.models import A
 
 __all__ = ('LazyTreesTestCase', 'ModelTreeTestCase')
 
@@ -449,3 +455,27 @@ class ModelTreeTestCase(TestCase):
             'JOIN "tests_project" ON ("tests_meeting"."project_id" = '
             '"tests_project"."id")'
             .replace(' ', ''))
+
+    def test_unrelated_model_errors(self):
+        with self.assertRaises(ModelNotRelated):
+            self.office_mt.get_model('tests.A')
+        with self.assertRaises(ModelNotRelated):
+            self.employee_mt.get_model(A)
+        with self.assertRaises(ModelNotRelated):
+            self.employee_mt.get_model('A')
+        with self.assertRaises(ModelDoesNotExist):
+            self.employee_mt.get_model('NotARealModel', local=False)
+        with self.assertRaises(ModelNotUnique):
+            self.employee_mt.get_model('NonUniqueModelName', local=False)
+        with self.assertRaises(ModelNotUnique):
+            self.employee_mt.get_model('NonUniqueModelName', local=True)
+        with self.assertRaises(ModelNotUnique):
+            self.employee_mt.get_model(
+                'DisconnectedNonUniqueModelName', local=False)
+        with self.assertRaises(ModelNotRelated):
+            self.employee_mt.get_model(
+                'DisconnectedNonUniqueModelName', local=True)
+
+    def test_tree_fails_when_given_empty_model_name(self):
+        with self.assertRaises(TypeError):
+            ModelTree(model=None)

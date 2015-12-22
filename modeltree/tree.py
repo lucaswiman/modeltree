@@ -316,7 +316,7 @@ class ModelTree(object):
             # Attempt to find the model based on the name. Since we don't
             # have the app name, if a model of the same name exists multiple
             # times, we need to throw an error.
-            for app, app_models in apps.app_models.items():
+            for app, app_models in apps.all_models.items():
                 if model_name in app_models:
                     if model is not None:
                         raise ModelNotUnique('The model "{0}" is not unique. '

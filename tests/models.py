@@ -40,6 +40,14 @@ class Meeting(models.Model):
     end_time = models.DateTimeField()
 
 
+class NonUniqueModelName(models.Model):
+    meeting = models.ForeignKey(Meeting)
+
+
+class DisconnectedNonUniqueModelName(models.Model):
+    meeting = models.ForeignKey(Meeting, related_name='+')
+
+
 # Router Test Models.. no relation to the above models
 # The raw model tree looks like this:
 #        A
