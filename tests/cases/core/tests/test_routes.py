@@ -1,5 +1,7 @@
+from unittest import expectedFailure
+
 from django.test import TestCase
-from modeltree.tree import ModelTree
+from modeltree.tree import ModelTree, ModelNotRelated
 from tests.models import *  # noqa
 
 __all__ = ('RouterTestCase', 'FieldRouterTestCase')
@@ -299,3 +301,33 @@ class FieldRouterTestCase(TestCase):
 
         with self.assertRaises(ValueError):
             ModelTree(A, **kwargs)
+
+    def test_excluded_model(self):
+        tree = ModelTree(K)
+        disconnected_tree = ModelTree(K, excluded_models=[J])
+        with self.assertRaises(ModelNotRelated):
+            disconnected_tree._node_path(F)
+        path = [n.model for n in tree._node_path(F)]
+        self.assertEqual(path, [J, F])
+
+    @expectedFailure
+    def test_symmetrical_required_route(self):
+        kwargs = {
+            'required_routes': [{
+                'target': 'tests.D',
+                'source': 'tests.C',
+                'symmetrical': False,
+            }],
+        }
+        asymmetric_tree = ModelTree(A, **kwargs)
+        self.assertEqual([n.model for n in asymmetric_tree._node_path(C)], [C])
+
+        kwargs = {
+            'required_routes': [{
+                'target': 'tests.D',
+                'source': 'tests.C',
+                'symmetrical': True,
+            }],
+        }
+        symmetric_tree = ModelTree(A, **kwargs)
+        self.assertEqual([n.model for n in symmetric_tree._node_path(C)], [C])
